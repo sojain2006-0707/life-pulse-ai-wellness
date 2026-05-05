@@ -1,43 +1,84 @@
-﻿import React, { useState } from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider, useAuth } from '@/lib/auth-context';
-import AuthenticationPages from './components/AuthenticationPages';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navigation from './components/Navigation';
+import HeroSection from './components/HeroSection';
+import FeaturesSection from './components/FeaturesSection';
+import CTASection from './components/CTASection';
+import Footer from './components/Footer';
 import ComprehensiveDashboard from './components/ComprehensiveDashboard';
-import DailyMoodTracker from './pages/DailyMoodTracker';
+import ComprehensiveTrackingForms from './components/ComprehensiveTrackingForms';
 import MusicTherapyPlayer from './components/MusicTherapyPlayer';
 import ProfessionalHelpCenter from './components/ProfessionalHelpCenter';
-import AICopilot from './components/AICopilot';
+import AuthenticationPages from './components/AuthenticationPages';
+import { Button } from './components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
+import { Badge } from './components/ui/badge';
 import { 
   Heart, 
+  Activity, 
+  Moon, 
+  Brain, 
+  Music, 
+  Users, 
   BarChart3,
   Calendar,
-  Music,
-  Users,
   Menu,
   X,
+  Settings,
   LogOut,
   User
 } from 'lucide-react';
 import './App.css';
 
-const queryClient = new QueryClient();
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  joinDate: string;
+}
 
-const AppContent: React.FC = () => {
-  const { user, isAuthenticated, logout, loading } = useAuth();
+const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check authentication status on app load
+  useEffect(() => {
+    const token = localStorage.getItem('lifepulse_token');
+    const userData = localStorage.getItem('lifepulse_user');
+    
+    if (token && userData) {
+      try {
+        setUser(JSON.parse(userData));
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('lifepulse_token');
+        localStorage.removeItem('lifepulse_user');
+      }
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('lifepulse_token');
+    localStorage.removeItem('lifepulse_user');
+    setUser(null);
+    setIsAuthenticated(false);
+    setCurrentPage('home');
+  };
 
   const NavigationItem = ({ 
     page, 
     icon: Icon, 
-    label
+    label, 
+    badge 
   }: { 
     page: string; 
     icon: React.ComponentType<any>; 
-    label: string;
+    label: string; 
+    badge?: string;
   }) => (
     <button
       onClick={() => {
@@ -52,27 +93,21 @@ const AppContent: React.FC = () => {
     >
       <Icon className="h-5 w-5" />
       <span className="hidden md:inline">{label}</span>
+      {badge && <Badge variant="secondary" className="ml-auto">{badge}</Badge>}
     </button>
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Heart className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">Loading LifePulse...</p>
-        </div>
-      </div>
-    );
-  }
+  const LandingPage = () => (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <Navigation />
+      <HeroSection />
+      <FeaturesSection />
+      <CTASection />
+      <Footer />
+    </div>
+  );
 
-  // Show authentication page if not logged in
-  if (!isAuthenticated) {
-    return <AuthenticationPages />;
-  }
-
-  // Show main application if authenticated
-  return (
+  const DashboardLayout = () => (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar - Desktop */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
@@ -108,7 +143,7 @@ const AppContent: React.FC = () => {
                 <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
               <button
-                onClick={logout}
+                onClick={handleSignOut}
                 className="ml-2 text-gray-400 hover:text-gray-600"
               >
                 <LogOut className="h-4 w-4" />
@@ -165,7 +200,7 @@ const AppContent: React.FC = () => {
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={handleSignOut}
                   className="ml-2 text-gray-400 hover:text-gray-600"
                 >
                   <LogOut className="h-4 w-4" />
@@ -193,7 +228,7 @@ const AppContent: React.FC = () => {
               <span className="text-lg font-bold text-gray-900">LifePulse</span>
             </div>
             
-            <div className="w-6"></div>
+            <div className="w-6"></div> {/* Spacer for centering */}
           </div>
         </div>
 
@@ -201,29 +236,29 @@ const AppContent: React.FC = () => {
         <main className="flex-1 overflow-y-auto">
           <div className="py-6">
             {currentPage === 'dashboard' && <ComprehensiveDashboard />}
-            {currentPage === 'tracking' && <DailyMoodTracker />}
+            {currentPage === 'tracking' && <ComprehensiveTrackingForms />}
             {currentPage === 'music' && <MusicTherapyPlayer />}
             {currentPage === 'professionals' && <ProfessionalHelpCenter />}
           </div>
         </main>
       </div>
-      {/* Global floating AI Copilot */}
-      <AICopilot />
     </div>
   );
-};
 
-const App: React.FC = () => {
+  // Show authentication page if not logged in
+  if (!isAuthenticated) {
+    return (
+      <div className="App">
+        <AuthenticationPages />
+      </div>
+    );
+  }
+
+  // Show main application if authenticated
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <div className="App">
+      <DashboardLayout />
+    </div>
   );
 };
 

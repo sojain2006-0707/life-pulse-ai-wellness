@@ -1,38 +1,62 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Brain, 
-  Lightbulb, 
-  Target, 
-  AlertTriangle,
-  CheckCircle,
-  TrendingUp,
-  MessageSquare,
-  Heart
-} from "lucide-react";
+import { Brain, Lightbulb, Target, CheckCircle, Heart, MessageSquare } from "lucide-react";
+import useInsights from "@/hooks/use-insights";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AIInsightsSection = () => {
-  const insights = [
+  const { insights, recommendations, isLoading, error } = useInsights();
+
+  if (error) {
+    return (
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      </section>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="space-y-8">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-6 w-64 mt-2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4 mt-2" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const defaultInsights = [
     {
-      type: "Pattern Detection",
-      icon: TrendingUp,
-      title: "Sleep-Mood Connection Found",
-      description: "Your mood scores are 23% higher on days when you sleep 7+ hours. Consider maintaining a consistent sleep schedule.",
+      type: "pattern",
+      icon: Brain,
+      title: "Sleep Pattern Impact",
+      description: "Getting 7+ hours of sleep consistently leads to better mood scores.",
       severity: "info",
-      confidence: 94
-    },
-    {
-      type: "Trigger Alert",
-      icon: AlertTriangle,
-      title: "Potential Stress Trigger",
-      description: "Work meetings on Mondays correlate with higher stress levels. Try scheduling buffer time before important meetings.",
-      severity: "warning",
       confidence: 87
     },
     {
-      type: "Positive Pattern",
-      icon: CheckCircle,
+      type: "pattern",
+      icon: Lightbulb,
       title: "Exercise Boost Detected",
       description: "Your mood improves by 31% on days with physical activity. Keep up the great work with your fitness routine!",
       severity: "success",
@@ -40,7 +64,7 @@ const AIInsightsSection = () => {
     }
   ];
 
-  const recommendations = [
+  const defaultRecommendations = [
     {
       category: "Mindfulness",
       title: "5-Minute Breathing Exercise",

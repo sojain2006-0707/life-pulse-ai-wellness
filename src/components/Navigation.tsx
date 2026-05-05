@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, Activity, Brain, Music } from "lucide-react";
+import { Heart, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -26,13 +28,25 @@ const Navigation = () => {
             <a href="#dashboard" className="text-muted-foreground hover:text-primary transition-colors">
               Dashboard
             </a>
+            <button
+              onClick={() => navigate("/mood-tracker")}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Mood Tracker
+            </button>
             <a href="#insights" className="text-muted-foreground hover:text-primary transition-colors">
               AI Insights
             </a>
-            <Button variant="outline" size="sm">
+            <Button 
+              className="bg-white hover:bg-gray-100 text-gray-800"
+              onClick={() => navigate("/signin")}
+            >
               Sign In
             </Button>
-            <Button variant="hero" size="sm">
+            <Button 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
+              onClick={() => navigate("/signup")}
+            >
               Get Started
             </Button>
           </div>
@@ -40,8 +54,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <Button
-              variant="ghost"
-              size="icon"
+              className="hover:bg-gray-100"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -62,10 +75,20 @@ const Navigation = () => {
               <a href="#insights" className="text-muted-foreground hover:text-primary transition-colors">
                 AI Insights
               </a>
-              <Button variant="outline" size="sm" className="w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => navigate("/signin")}
+              >
                 Sign In
               </Button>
-              <Button variant="hero" size="sm" className="w-full">
+              <Button 
+                variant="hero" 
+                size="sm" 
+                className="w-full"
+                onClick={() => navigate("/signup")}
+              >
                 Get Started
               </Button>
             </div>
